@@ -1,32 +1,39 @@
-from ubuntu:16.04
+from centos:latest
 
 ENV http_proxy 'http://proxyout.lanl.gov:8080'
 ENV https_proxy 'http://proxyout.lanl.gov:8080'
 ENV no_proxy 'localhost,127.0.0.1'
 
-RUN echo 'Acquire::http::Proxy "http://proxyout.lanl.gov:8080";' >> /etc/apt/apt.conf.d/docker-clean
+RUN yum -y update
 
-RUN apt-get update
-
-RUN apt-get -y install \
+RUN yum install -y \
   autoconf\
   cmake\
   gcc\
+  gcc-gfortran\
+  gcc-c++\
   git\
-  gfortran\
-  g++\
   libtool\
-  libva-dev\
+  make\
   mpich\
+  mpich-devel\
   openssh-server\
-  pkg-config\
-  python\
-  python-dev\
+  python-devel\
   python-pip\
-  xutils-dev\
   wget
 
-# needed by mesa
+
+RUN wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+RUN rpm -ivh epel-release-latest-7.noarch.rpm
+RUN yum update
+
+RUN yum install -y \
+  libva\
+  pkg-config\
+  python-pip \
+  xutils-dev
+
+## needed by mesa
 RUN pip install mako
 
 # build mesa
@@ -34,7 +41,7 @@ WORKDIR /usr/local
 # this link will expire as mesa gets older and then become stable in an old release
 # download, unpack, and remove tar file...keeps image smaller and reduces number of layers
 RUN wget https://mesa.freedesktop.org/archive/11.2.1/mesa-11.2.1.tar.gz && tar xvzf mesa-11.2.1.tar.gz && rm mesa-11.2.1.tar.gz
-
+#
 WORKDIR /usr/local/mesa-11.2.1
 
 RUN autoreconf -fi
@@ -61,11 +68,11 @@ RUN ./configure \
 
 RUN make; make install
 
-#RUN ln -s /usr/local/mesa-11.0.9/lib/gallium/libOSMesa.so /usr/local/lib
+#RUN ln -s /usr/local/mesa-11.2.1/lib/gallium/libOSMesa.so /usr/local/lib
 
-# build glu
-ENV C_INCLUDE_PATH '/usr/local/mesa-11.0.9/include'
-ENV CPLUS_INCLUDE_PATH '/usr/local/mesa-11.0.9/include'
+## build glu
+ENV C_INCLUDE_PATH '/usr/local/mesa-11.2.1/include'
+ENV CPLUS_INCLUDE_PATH '/usr/local/mesa-11.2.1/include'
 WORKDIR /usr/local
 RUN git clone http://anongit.freedesktop.org/git/mesa/glu.git
 
@@ -98,17 +105,17 @@ RUN cmake \
   -DPARAVIEW_ENABLE_PYTHON=ON \
   -DPARAVIEW_BUILD_QT_GUI=OFF \
   -DVTK_USE_X=OFF \
-  -DOPENGL_INCLUDE_DIR=/usr/local/mesa-11.0.9/include \
-  -DOPENGL_gl_LIBRARY=/usr/local/mesa-11.0.9/lib/libOSMesa.so \
+  -DOPENGL_INCLUDE_DIR=/usr/local/mesa-11.2.1/include \
+  -DOPENGL_gl_LIBRARY=/usr/local/mesa-11.2.1/lib/libOSMesa.so \
   -DVTK_OPENGL_HAS_OSMESA=ON \
-  -DOSMESA_INCLUDE_DIR=/usr/local/mesa-11.0.9/include \
-  -DOSMESA_LIBRARY=/usr/local/mesa-11.0.9/lib/libOSMesa.so \
+  -DOSMESA_INCLUDE_DIR=/usr/local/mesa-11.2.1/include \
+  -DOSMESA_LIBRARY=/usr/local/mesa-11.2.1/lib/libOSMesa.so \
   -DPARAVIEW_USE_MPI=ON \
   /usr/local/paraview
  
-RUN make -j16
-RUN make -j16 install
-
-
-
+#RUN make -j16
+#RUN make -j16 install
+#
+#
+#
 
