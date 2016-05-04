@@ -41,7 +41,7 @@ WORKDIR /usr/local
 # this link will expire as mesa gets older and then become stable in an old release
 # download, unpack, and remove tar file...keeps image smaller and reduces number of layers
 RUN wget https://mesa.freedesktop.org/archive/11.2.1/mesa-11.2.1.tar.gz && tar xvzf mesa-11.2.1.tar.gz && rm mesa-11.2.1.tar.gz
-#
+
 WORKDIR /usr/local/mesa-11.2.1
 
 RUN autoreconf -fi
@@ -96,6 +96,9 @@ RUN git submodule update
 
 RUN mkdir /usr/local/paraview.bin
 
+ENV MPI_C_LIBRARIES '/usr/lib64/mpich/lib/'
+ENV MPI_C_INCLUDE_PATH '/usr/include/mpich-x86_64/'
+
 # build paraview
 WORKDIR /usr/local/paraview.bin
 RUN cmake \
@@ -111,11 +114,13 @@ RUN cmake \
   -DOSMESA_INCLUDE_DIR=/usr/local/mesa-11.2.1/include \
   -DOSMESA_LIBRARY=/usr/local/mesa-11.2.1/lib/libOSMesa.so \
   -DPARAVIEW_USE_MPI=ON \
+  -DMPI_C_LIBRARIES=/usr/lib64/mpich/lib/libmpich.so \
+  -DMPI_C_INCLUDE_PATH=/usr/include/mpich-x86_64 \
+  -DMPI_CXX_LIBRARIES=/usr/lib64/mpich/lib/libmpichcxx.so \
+  -DMPI_CXX_INCLUDE_PATH=/usr/include/mpich-x86_64 \
+  -DMPI_Fortran_LIBRARIES=/usr/lib64/mpich/lib/libmpichf90.so \
+  -DMPI_Fortran_INCLUDE_PATH=/usr/include/mpich-x86_64 \
   /usr/local/paraview
  
-#RUN make -j16
-#RUN make -j16 install
-#
-#
-#
-
+RUN make -j16
+RUN make -j16 install
