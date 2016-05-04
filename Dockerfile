@@ -61,11 +61,11 @@ RUN ./configure \
 
 RUN make; make install
 
-#RUN ln -s /usr/local/mesa-11.0.9/lib/gallium/libOSMesa.so /usr/local/lib
+#RUN ln -s /usr/local/mesa-11.2.1/lib/gallium/libOSMesa.so /usr/local/lib
 
 # build glu
-ENV C_INCLUDE_PATH '/usr/local/mesa-11.0.9/include'
-ENV CPLUS_INCLUDE_PATH '/usr/local/mesa-11.0.9/include'
+ENV C_INCLUDE_PATH '/usr/local/mesa-11.2.9/include'
+ENV CPLUS_INCLUDE_PATH '/usr/local/mesa-11.2.9/include'
 WORKDIR /usr/local
 RUN git clone http://anongit.freedesktop.org/git/mesa/glu.git
 
@@ -98,11 +98,11 @@ RUN cmake \
   -DPARAVIEW_ENABLE_PYTHON=ON \
   -DPARAVIEW_BUILD_QT_GUI=OFF \
   -DVTK_USE_X=OFF \
-  -DOPENGL_INCLUDE_DIR=/usr/local/mesa-11.0.9/include \
-  -DOPENGL_gl_LIBRARY=/usr/local/mesa-11.0.9/lib/libOSMesa.so \
+  -DOPENGL_INCLUDE_DIR=/usr/local/mesa-11.2.1/include \
+  -DOPENGL_gl_LIBRARY=/usr/local/mesa-11.2.1/lib/libOSMesa.so \
   -DVTK_OPENGL_HAS_OSMESA=ON \
-  -DOSMESA_INCLUDE_DIR=/usr/local/mesa-11.0.9/include \
-  -DOSMESA_LIBRARY=/usr/local/mesa-11.0.9/lib/libOSMesa.so \
+  -DOSMESA_INCLUDE_DIR=/usr/local/mesa-11.2.1/include \
+  -DOSMESA_LIBRARY=/usr/local/mesa-11.2.1/lib/libOSMesa.so \
   -DPARAVIEW_USE_MPI=ON \
   /usr/local/paraview
  
