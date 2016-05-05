@@ -1,0 +1,40 @@
+from vpic1
+
+# get more recent cmake as required for vpic
+RUN mkdir /usr/local/cmake-3
+WORKDIR /usr/local/cmake-3
+RUN wget  https://cmake.org/files/v3.5/cmake-3.5.2-Linux-x86_64.tar.gz
+RUN tar -xzf cmake-3.5.2-Linux-x86_64.tar.gz
+ENV PATH /usr/local/cmake-3/cmake-3.5.2-Linux-x86_64/bin:$PATH
+
+# checkout and build vpic
+WORKDIR /usr/local
+#RUN git clone --recursive https://github.com/losalamos/vpic.git
+RUN git clone https://github.com/demarle/vpic.git
+WORKDIR /usr/local/vpic
+RUN git checkout -b dockerify origin/dockerify
+RUN git submodule init
+RUN git submodule update
+RUN mkdir /usr/local/vpic.bin
+WORKDIR /usr/local/vpic.bin
+RUN cmake \
+  -DUSE_CATALYST=ON \
+  -DCMAKE_BUILD_TYPE=Release \
+  /usr/local/vpic
+RUN make -j16
+
+# prep and run one of the example input decks
+WORKDIR /usr/local/vpic.bin
+RUN ./bin/vpic ../vpic/sample/harris
+RUN mkdir /usr/local/vpic.run1
+WORKDIR /usr/local/vpic.run1
+RUN /usr/local/vpic.bin/harris.Linux 1 0
+
+# prep and run another
+WORKDIR /usr/local/vpic.bin
+ENV CPLUS_INCLUDE_PATH /usr/local/vpic/src/util/catalyst/
+RUN ./bin/vpic ../vpic/sample/8preconnection.cxx
+RUN mkdir /usr/local/vpic.run2
+WORKDIR /usr/local/vpic.run2
+ENV LD_LIBRARY_PATH /usr/local/paraview.bin/lib
+RUN mpirun -np 8 /usr/local/vpic.bin/8preconnection.Linux
